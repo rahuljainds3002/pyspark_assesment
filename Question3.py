@@ -22,15 +22,25 @@ columns = ["employee_id", "name", "age", "salary"]
 
 df = spark.createDataFrame(data, schema=columns)
 
-df = df.withColumn("age_group ",when(df.age>=50,"Senior")
+df = df.withColumn("age_group", when(df.age>=50,"Senior")
                    .when((df.age<50)&(df.age>=30),"Mid")
                    .when((df.age<30),"Young").otherwise("NA"))
-df = df.withColumn("salary_range  ",when(df.salary >=100000,"High")
-                   .when((df.salary <100000)&(df.salary >=50000),"Medium")
-                   .when((df.salary <50000),"Low").otherwise("NA"))
+# df = df.withColumn("age_group", when(df.age >= 50, "Senior")
+#                    .when((df.age < 50) & (df.age >= 30), "Mid")
+#                    .when(df.age < 30, "Young").otherwise("NA"))
+df = df.withColumn("salary_range", when(df.salary >= 100000, "High")
+                   .when((df.salary < 100000) & (df.salary >= 50000), "Medium")
+                   .when(df.salary < 50000, "Low").otherwise("NA"))
 
 df1 = df.filter(col("name").startswith("J"))
 df2 = df.filter(col("name").endswith("e"))
+df_agg = df.groupBy("age_group").agg(
+    sum(df.salary).alias("sum_salary"),
+    min(df.salary).alias("min_salary"),
+    max(df.salary).alias("max_salary"),
+    avg(df.salary).alias("average_salary")
+)
 df.show()
 df1.show()
 df2.show()
+df_agg.show()
